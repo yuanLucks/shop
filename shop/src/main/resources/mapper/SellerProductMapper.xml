@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyy.shop.mapper.SellerProductMapper">
+
+    <select id="queryTodayOrderAmountAndCount" resultType="java.util.Map">
+        SELECT SUM(amount) AS amount, COUNT(*) AS sun  FROM orders WHERE TO_DAYS(paydate) = TO_DAYS(NOW())
+    </select>
+
+    <select id="queryProductByLike" resultType="java.util.Map">
+        SELECT * FROM products s
+        <where>
+            <if test="proname != '' and proname != null">
+                and s.proname like CONCAT(CONCAT('%',#{proname},'%'))
+            </if>
+            <if test="groups != null">
+               and s.groupid=#{groups}
+            </if>
+            <if test="typeid != null">
+                and s.typeid=#{typeid}
+            </if>
+            <if test="startOne != null and startTwo != null">
+               and s.proyuan between #{startOne} and #{startTwo}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteProductByProid" parameterType="int">
+        DELETE FROM products WHERE proid=#{proid}
+    </delete>
+
+    <delete id="deleteProductByGroups" parameterType="int">
+        DELETE FROM products WHERE groups=#{groups}
+    </delete>
+
+    <insert id="insertProtype" parameterType="com.xyy.shop.pojo.products.ProType">
+        INSERT INTO `protype` VALUES(NULL,#{typename})
+    </insert>
+
+    <delete id="deleteProtype" parameterType="int">
+        DELETE FROM protype WHERE typeid=#{typeid}
+    </delete>
+
+    <update id="updateProtype" parameterType="com.xyy.shop.pojo.products.ProType">
+        update protype set typename=#{typename} where typeid=#{typeid}
+    </update>
+
+    <insert id="insertProductGroups" parameterType="com.xyy.shop.pojo.products.ProductsGroup">
+        insert into pro_groups values(null,#{groname})
+    </insert>
+    
+    <delete id="deleteProductGroupsByGroupId" parameterType="int">
+        DELETE FROM pro_groups WHERE groupid=#{groupid}
+    </delete>
+
+    <update id="updateProductGroups" parameterType="com.xyy.shop.pojo.products.ProductsGroup">
+        update pro_groups set groname=#{groname} where groupid=#{groupid}
+    </update>
+
+    <delete id="deleteProductByTypeid" parameterType="int">
+        DELETE FROM products WHERE typeid=#{typeid}
+    </delete>
+
+    <update id="updateProducts" parameterType="com.xyy.shop.pojo.products.Products">
+        UPDATE products SET proname=#{proname},proprice=#{proprice},proyuan=#{proyuan},
+            probuysum=#{probuysum},profreight=#{profreight},prodetailed=#{prodetailed},
+            proxj=#{proxj},typeid=#{typeid},storeid=#{storeid},priority=#{priority},
+            firstshow=#{firstshow},richtext=#{richtext},vipuser=#{vipuser}
+        WHERE proid=#{proid}
+    </update>
+
+    <!--发布商品-->
+    <insert id="insertProduct" parameterType="com.xyy.shop.pojo.products.Products">
+        <selectKey keyProperty="proid" resultType="int">
+            select LAST_INSERT_ID()
+        </selectKey>
+       INSERT INTO products VALUES(NULL,#{proname},#{proprice},#{proyuan},#{probuysum},#{profreight},
+            #{prodetailed},#{proxj},#{typeid},#{storeid},#{priority},#{firstshow},
+            #{richtext},#{vipuser},#{coupon})
+    </insert>
+
+    <insert id="insertPropicture" parameterType="com.xyy.shop.pojo.products.ProPicture">
+      INSERT INTO propicture VALUES(NULL,#{picimg},#{proid})
+    </insert>
+
+    <insert id="insertCoupon" parameterType="com.xyy.shop.pojo.products.Coupon">
+        <selectKey keyProperty="id" resultType="int">
+            select LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO p_coupon values(NULL,#{name},#{money},#{coupondesc},#{creartetime},#{expiretime},#{status})
+    </insert>
+
+
+</mapper>

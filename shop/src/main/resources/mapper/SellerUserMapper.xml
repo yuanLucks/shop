@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyy.shop.mapper.SellerUserMapper">
+
+    <resultMap type="com.xyy.shop.pojo.user.Message" id="messages">
+        <id property="mesId" column="mes_id"/>
+        <result property="mesTitle" column="mes_title"/>
+        <result property="mesName" column="mes_name"/>
+        <result property="uid" column="uid"/>
+    </resultMap>
+
+    <select id="querySellerUser" resultType="com.xyy.shop.pojo.user.User">
+        SELECT * FROM USER u
+        INNER JOIN vip_detailed d ON u.vip=d.detid
+        INNER JOIN vip_type e ON d.vid = e.vid
+        <where>
+            <if test="utemphone != null and utemphone != ''">
+               and u.utemphone LIKE CONCAT(CONCAT('%',#{utemphone},'%'))
+            </if>
+            <if test="uname != null and uname != ''">
+                and u.uname LIKE CONCAT(CONCAT('%',#{uname},'%'))
+            </if>
+            <if test="vip != null">
+               and e.vid=#{vip}
+            </if>
+        </where>
+    </select>
+
+    <select id="querySellerCustom" resultType="java.util.Map">
+       SELECT r.uname , r.utemphone , v.vipid ,r.`integral` ,
+       (SELECT COUNT(*) FROM orders WHERE uid =1) AS puyCount FROM USER r
+        INNER JOIN  vip_detailed v ON v.`detid` = r.`vip`
+    </select>
+
+    <select id="querySellerCustomDetailed" resultType="java.util.Map">
+      SELECT u.utruename , u.uname , u.utemphone , a.* , u.integral
+        , (SELECT COUNT(*) FROM orders WHERE uid =1) AS sun
+        , (SELECT SUM(amount) FROM orders WHERE uid IN (SELECT uid FROM USER)) AS amout
+        ,(SELECT SUM(amount) FROM orders WHERE uid IN (SELECT uid FROM USER WHERE STATUS = '已退款')) AS refund
+      FROM USER u
+      INNER JOIN address a ON a.adderid = u.adderid
+    </select>
+
+    <select id="selectSellerUserByUid" parameterType="int" resultType="int">
+        select vip from user where uid = #{uid}
+    </select>
+
+    <delete id="deleteSellerUcouponeByUid" parameterType="int">
+        DELETE u_coupon FROM u_coupon WHERE uid = #{uid}
+    </delete>
+
+    <update id="updateSellerUserByUid" parameterType="int">
+        UPDATE USER SET integral=0 WHERE uid = #{uid}
+    </update>
+
+    <update id="updateVipdetailedByVipidAndVip" parameterType="int">
+        UPDATE vip_detailed SET vipid = #{vipid} WHERE detid = #{detid}
+    </update>
+
+    <insert id="insertMessage" parameterType="com.xyy.shop.pojo.user.Message">
+        INSERT INTO message VALUES(NULL,#{message.mesTitle},#{message.mesName},#{message.uid})
+    </insert>
+
+    <select id="selectMessageByUid" resultMap="messages">
+        select * from message where uid=#{uid}
+    </select>
+
+</mapper>

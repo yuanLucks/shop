@@ -1,0 +1,42 @@
+spring:
+  redis:
+    host: 127.0.0.1   #本机
+    #host: 192.168.224.225
+    port: 6379      #redis默认端口
+    password:       #密码
+    database: 0      #操作redis的哪一个数据库
+    jedis:
+      pool:
+        max-active: 8 # 连接池最大连接数（使用负值表示没有限制）
+        max-wait: -1  # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-idle: 8   # 连接池中的最大空闲连接
+        min-idle: 0  # 连接池中的最小空闲连接
+    timeout: 300   #连接超时时秒
+
+  mvc:
+    static-path-pattern: /image/**     #图片上传虚拟路径
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/shopdb?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: 123
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+
+  resources:
+    static-locations: file:D://tupian//
+
+mybatis:
+  type-handlers-package: com.xyy.shop.pojo
+  mapper-locations:
+    - classpath:mapper/**/*.xml
+
+audience:
+  clientId: 098f6bcd4621d373cade4e832627b4f6
+  base64Secret: MDk4ZjZiY2Q0NjIxZDM3M2NhZGU0ZTgzMjYyN2I0ZjY=
+  name: restapiuser
+  expiresSecond: 172800
+
+wechat:
+  mpAppId: wxfcf12446d226e32d
+  mpAppSecret: 0d59de8f03d7a099f034e8fa3a3bff8e

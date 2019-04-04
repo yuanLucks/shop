@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyy.shop.mapper.UserMapper">
+
+    <resultMap id="userLoginByUsernameAndPasswordResultMap" type="com.xyy.shop.pojo.user.User">
+        <id column="uid" property="uid"></id>
+        <result column="uname" property="uname"></result>
+        <result column="upassword" property="upassword"></result>
+        <result column="utruename" property="utruename"></result>
+        <result column="usex" property="usex"></result>
+        <result column="utemphone" property="utemphone"></result>
+        <result column="birthday" property="birthday"></result>
+        <result column="STATUS" property="STATUS"></result>
+        <result column="CODE" property="CODE"></result>
+        <result column="uimg" property="uimg"></result>
+        <result column="adderid" property="adderid"></result>
+        <association property="address" javaType="com.xyy.shop.pojo.user.Address">
+            <id column="adderid" property="adderid"></id>
+            <result column="province" property="province"></result>
+            <result column="market" property="market"></result>
+            <result column="district" property="district"></result>
+            <result column="detaadder" property="detaadder"></result>
+        </association>
+    </resultMap>
+
+    <select id="userLoginByUsernameAndPassword" parameterType="String" resultMap="userLoginByUsernameAndPasswordResultMap">
+      SELECT * FROM USER u , address s WHERE u.adderid = s.adderid and uname = #{uname} and upassword = #{upassword}
+    </select>
+
+    <insert id="addUser" parameterType="com.xyy.shop.pojo.user.User">
+        INSERT INTO USER VALUES(NULL,#{uname},#{upassword},#{utruename},#{usex},#{utemphone},#{birthday},#{STATUS},#{CODE},#{uimg},#{adderid})
+    </insert>
+
+    <select id="queryUserByuname" resultType="com.xyy.shop.pojo.user.User" parameterType="String">
+        SELECT * FROM USER WHERE uname = #{uname}
+    </select>
+
+    <insert id="updateUserStatus">
+        UPDATE USER SET STATUS=#{STATUS} WHERE uid=#{uid};
+    </insert>
+
+    <insert id="addAddress" parameterType="com.xyy.shop.pojo.user.User">
+        INSERT INTO address VALUES(#{address.adderid},#{address.province},#{address.market},#{address.district},#{address.detaadder})
+    </insert>
+
+    <select id="queryUseridByUname" resultType="int" parameterType="String">
+        SELECT uid FROM USER WHERE uname = #{uname}
+    </select>
+
+    <select id="queryUserByUid" parameterType="int" resultMap="userLoginByUsernameAndPasswordResultMap">
+        SELECT * FROM USER u , address s WHERE u.adderid = s.adderid and uid = #{uid}
+    </select>
+</mapper>

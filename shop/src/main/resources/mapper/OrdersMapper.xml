@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyy.shop.mapper.OrdersMapper">
+
+    <resultMap id="queryAllSendByUidResultMap" type="com.xyy.shop.pojo.order.Send">
+        <id column="sendid" property="sendid"></id>
+        <result column="temphone" property="temphone"></result>
+        <result column="NAME" property="NAME"></result>
+        <result column="defaults" property="defaults"></result>
+        <collection property="songAddress" ofType="com.xyy.shop.pojo.order.SongAddress">
+            <id column="songid" property="songid"></id>
+            <result column="province" property="province"></result>
+            <result column="market" property="market"></result>
+            <result column="district" property="district"></result>
+            <result column="detaadder" property="detaadder"></result>
+        </collection>
+    </resultMap>
+
+    <insert id="insertOrders" parameterType="com.xyy.shop.pojo.order.Orders">
+        INSERT INTO orders VALUES
+        (NULL,#{proname},#{amount},#{prosum},#{paydate},#{mjwords},
+        #{mjname},#{ordernumber},#{xddate},#{serialnumber},#{postage},
+        #{payment},#{STATUS},#{uid},#{proid},#{sendid},#{orderdate})
+    </insert>
+
+    <select id="queryAllSendByUid" parameterType="int" resultMap="queryAllSendByUidResultMap">
+        SELECT * FROM send WHERE uid = #{uid}
+    </select>
+
+    <insert id="addSend" parameterType="com.xyy.shop.pojo.order.Send">
+        INSERT INTO send VALUES(NULL,#{temphone},#{NAME},#{defaults},#{songid},#{uid})
+    </insert>
+
+    <insert id="addSongAddress" parameterType="com.xyy.shop.pojo.order.Send">
+        INSERT INTO song_address VALUES(NULL,#{songAddress.province},#{songAddress.market},#{songAddress.district},#{songAddress.detaadder})
+    </insert>
+
+    <update id="updateOrderStatus">
+        UPDATE orders SET STATUS=#{STATUS} where orderid=#{orderid}
+    </update>
+
+    <update id="updateOrderPay" parameterType="com.xyy.shop.pojo.order.Orders">
+        UPDATE orders
+        SET STATUS=#{STATUS},paydate=#{paydate},serialnumber=#{serialnumber},payment=#{payment}
+        where orderid=#{orderid}
+    </update>
+
+    <update id="updateManyOrderPay">
+        UPDATE orders
+        SET STATUS=#{orders.STATUS},paydate=#{orders.paydate},serialnumber=#{orders.serialnumber},payment=#{orders.payment}
+        where orderid in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+          #{id}
+        </foreach>
+    </update>
+
+    <select id="queryPropriceByOrderid" parameterType="int" resultType="String">
+        SELECT s.proprice FROM orders o
+        INNER JOIN products s ON o.proid = s.proid
+        WHERE o.orderid = #{orderid}
+    </select>
+    
+    <select id="queryAllStatus" resultType="com.xyy.shop.pojo.order.OrdStatus">
+        select * from ord_status
+    </select>
+
+    <update id="updateOrderStatusByOrderid" parameterType="String">
+        UPDATE orders SET STATUS=#{status} WHERE ordernumber=#{ordernumber}
+    </update>
+
+    <select id="queryStoreSendModes" parameterType="int" resultType="com.xyy.shop.pojo.products.Modes">
+        SELECT * FROM modes WHERE storeid=#{storeid}
+    </select>
+
+    <update id="updateSendAllIsDefault" parameterType="int">
+        UPDATE send SET defaults=0 WHERE uid=#{uid}
+    </update>
+
+    <update id="updateDefaultBySendid" parameterType="int">
+        UPDATE send SET defaults=1 WHERE sendid=#{sendid}
+    </update>
+
+    <select id="queryOrderByStatus" resultType="java.util.Map" parameterType="String">
+        select e.* , s.prosum , s.amount , pro.proname , pro.proprice ,t.storename
+        from orders s , propicture e , store t , products pro
+        where s.proid = e.proid and s.proid = pro.proid and t.storeid = pro.storeid and s.`STATUS` = #{status}
+    </select>
+
+    <select id="selectAllProtype" resultType="com.xyy.shop.pojo.products.ProType">
+        SELECT * FROM `protype`
+    </select>
+
+
+    <select id="selectOrderDiscount" parameterType="int" resultType="java.math.BigDecimal">
+        select e.discount
+        from vip_detailed d
+        right join  vip_grade e ON d.vipid = e.vipid
+        where detid = (select vip from user where uid = #{uid})
+    </select>
+
+    <select id="queryCouponValid" resultType="com.xyy.shop.pojo.products.Coupon" parameterType="int">
+         SELECT * FROM p_coupon WHERE id IN
+        (SELECT id FROM u_coupon WHERE uid =#{uid})
+        AND STATUS=0
+    </select>
+
+    <select id="queryCouponNo" resultType="com.xyy.shop.pojo.products.Coupon" parameterType="int">
+         SELECT * FROM p_coupon WHERE id IN
+        (SELECT id FROM u_coupon WHERE uid =#{uid})
+        AND STATUS=1
+    </select>
+
+    <select id="queryCouponUse" resultType="com.xyy.shop.pojo.products.Coupon" parameterType="int">
+         SELECT * FROM p_coupon WHERE id IN
+        (SELECT id FROM u_coupon WHERE uid =#{uid})
+        AND STATUS=2
+    </select>
+
+    <select id="queryCouponMoneyById" parameterType="int" resultType="java.math.BigDecimal">
+        SELECT money FROM p_coupon WHERE id =#{id}
+    </select>
+
+</mapper>

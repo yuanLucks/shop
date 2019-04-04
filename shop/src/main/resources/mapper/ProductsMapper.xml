@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyy.shop.mapper.ProductsMapper">
+
+    <resultMap id="queryProductsByProidResultMap" type="com.xyy.shop.pojo.products.Products">
+        <id column="proid" property="proid"></id>
+        <result column="proname" property="proname"></result>
+        <result column="proprice" property="proprice"></result>
+        <result column="prooriginal" property="prooriginal"></result>
+        <result column="probuysum" property="probuysum"></result>
+        <result column="profreight" property="profreight"></result>
+        <result column="prodetailed" property="prodetailed"></result>
+
+        <collection property="proPicture" ofType="com.xyy.shop.pojo.products.ProPicture">
+            <id column="picid" property="picid"></id>
+            <result column="picimg" property="picimg"></result>
+        </collection>
+    </resultMap>
+
+    
+    <select id="queryProtj" resultType="java.util.Map">
+          SELECT * FROM protj n , products s , propicture e
+          WHERE n.proid = s.proid AND s.proid = e.proid
+    </select>
+
+    <select id="queryProlun" resultType="java.util.Map">
+         SELECT * FROM prolun n , products s , propicture e
+         WHERE n.proid = s.proid AND s.proid = e.proid and s.proxj != '是'
+    </select>
+
+    <select id="queryProductsByProName" resultType="java.util.Map" parameterType="String">
+        select * from products s , propicture e
+        where s.proname LIKE CONCAT(CONCAT('%',#{proname}),'%') and s.proxj != '是'
+    </select>
+
+    <select id="queryProductsByProid" parameterType="int" resultType="java.util.Map">
+       SELECT * FROM products s ,propicture e , protype t , store st
+        WHERE s.proid= e.proid
+        AND s.typeid = t.typeid AND s.storeid = st.storeid and s.proid = #{proid}
+    </select>
+
+    <insert id="insertCollect" parameterType="com.xyy.shop.pojo.products.Collect">
+        insert into collect values(null,#{uid},#{proid})
+    </insert>
+
+    <select id="queryCollectByProid" parameterType="int" resultType="com.xyy.shop.pojo.products.Collect">
+        SELECT * FROM collect WHERE proid = #{proid}
+    </select>
+
+    <select id="queryProAssessByProidTopTwo" parameterType="int" resultType="com.xyy.shop.pojo.products.ProAssess">
+        select *  , ABS(now() - ss.assessdate) as dissTime from products s
+        inner join proassess ss on s.proid = ss.proid
+        WHERE s.proid = #{proid}
+        order by dissTime ASC LIMIT 0,2
+    </select>
+
+    <select id="queryAllProAssessByproid" parameterType="int" resultType="com.xyy.shop.pojo.products.ProAssess">
+        select *  from products s
+        inner join proassess ss on s.proid = ss.proid
+        WHERE s.proid = #{proid}
+    </select>
+
+    <select id="queryAllCollect" resultType="java.util.Map">
+        SELECT * FROM collect t
+        INNER JOIN products s ON t. proid = s.proid
+    </select>
+
+
+</mapper>

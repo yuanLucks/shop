@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyy.shop.mapper.SellerOrderMapper">
+
+    <select id="queryOrderByLike" resultType="com.xyy.shop.pojo.order.Orders">
+        select * from orders s
+        <where>
+            <if test="ordernumber != null and ordernumber != ''">
+            and s.ordernumber=#{ordernumber}
+        </if>
+            <if test="dateSatrt != null and dateEnd != null">
+                    and s.xddate between #{dateSatrt} and #{dateEnd}
+            </if>
+            <if test="proname != null and proname != '' ">
+                and s.proname=#{proname}
+            </if>
+            <if test="STATUS != null">
+                and STATUS=#{STATUS}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryAllOrder" resultType="com.xyy.shop.pojo.order.Orders">
+        SELECT * FROM orders
+    </select>
+
+    <select id="queryAllOrderByorderid" parameterType="int" resultType="com.xyy.shop.pojo.order.Orders">
+        SELECT * FROM orders WHERE orderid = #{orderid}
+    </select>
+
+    <update id="updateOrderByNumber">
+        update orders set orderdate=#{orderdate},status=#{status}
+        where ordernumber in
+        <foreach collection="number" item="ordernumber" open="(" close=")" separator=",">
+         #{ordernumber}
+        </foreach>
+    </update>
+
+    <update id="updateOrderReturnByNumber">
+        update orders set orderdate=#{orderdate},status=#{status}
+        where ordernumber in
+        <foreach collection="number" item="ordernumber" open="(" close=")" separator=",">
+            #{ordernumber}
+        </foreach>
+    </update>
+
+    <insert id="insertCoupon" parameterType="com.xyy.shop.pojo.products.Coupon">
+        <selectKey keyProperty="id" resultType="int">
+            select LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO p_coupon values(NULL,#{name},#{money},#{coupondesc},#{creartetime},#{expiretime},#{status})
+    </insert>
+
+    <update id="updateCoupon" parameterType="int">
+        UPDATE p_coupon SET STATUS=#{status} WHERE id=#{id}
+    </update>
+</mapper>
